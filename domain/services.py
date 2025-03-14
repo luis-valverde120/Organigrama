@@ -39,3 +39,12 @@ class OrganigramaService:
         :return: True si el nodo fue eliminado, false si no se encuentra
         """
         return self.repo.eliminar_nodo(id)
+
+    def obtener_nodo_por_id(self, id: int) -> bool:
+        """
+        Obtener un nodo por el ID
+
+        :param id: Identificador del nodo.
+        :return: Nodo si existe, None si no se encuentra
+        """
+        return self.repo.obtener_nodo_por_id(id)

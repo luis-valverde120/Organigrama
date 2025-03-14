@@ -1,7 +1,7 @@
 from flask import Flask
 from dotenv import load_dotenv
 import os
-from infrastructure.database import init_db
+from infrastructure.database import db
 from application.controllers import organigrama_blueprint
 
 def create_app():
@@ -16,11 +16,12 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-    # Inicializar la base de datos
-    init_db(app)
-
     # Registrar blueprints (rutas)
     app.register_blueprint(organigrama_blueprint)
+
+    # Inicializar la base de datos
+    db.init_app(app)
+
 
     return app
 
