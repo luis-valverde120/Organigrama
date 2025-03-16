@@ -1,13 +1,15 @@
 from flask import Flask
+from flask_cors import CORS
 from dotenv import load_dotenv
 import os
-from infrastructure.database import db
+from infrastructure.database import db, init_db
 from application.controllers import organigrama_blueprint
 
 def create_app():
     """Factory function para crear la aplicacion flask"""
     # carga de variables de entorno
     load_dotenv()
+
 
     # Crear la aplicacion Flask
     app = Flask(__name__)
@@ -20,8 +22,12 @@ def create_app():
     app.register_blueprint(organigrama_blueprint)
 
     # Inicializar la base de datos
-    db.init_app(app)
+    init_db(app) 
 
+    # Registrar blueprints (rutas)
+    app.register_blueprint(organigrama_blueprint, name="organigrama_v2")
+
+    CORS(app)
 
     return app
 

@@ -19,7 +19,15 @@ def add_nodo():
     data = request.json
     nodo = service.agregar_nodo(data)
     return jsonify(nodo.__dict__), 201
-    
+
+@organigrama_blueprint.route('/nodos/<int:id>', methods=['GET'])
+def get_nodo_by_id(id):
+    """Obtener nodos por id"""
+    nodo = service.obtener_nodo_por_id(id)
+    if nodo:
+        return jsonify(nodo.__dict__)
+    return jsonify({"error": "Nodo no encontrado"}), 404
+
 @organigrama_blueprint.route('/nodos/<int:id>', methods=['DELETE'])
 def delete_nodo(id):
     """Elimina un nodo del organigrama"""
