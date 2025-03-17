@@ -1,13 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { fetchNodos, addNodo, deleteNodo } from '../services/apiService';
-
-interface Nodo {
-  id: number;
-  nombre: string;
-  tipo: 'directo' | 'asesoria';
-  id_superior?: number;
-}
+import type { Nodo } from '@/types';
 
 export const useOrganigramaStore = defineStore('organigrama', () => {
   const nodos = ref<Nodo[]>([]);
