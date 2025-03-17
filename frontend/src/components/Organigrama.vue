@@ -14,13 +14,16 @@ const tipoCargo = ref<'directo' | 'asesoria'>('directo'); // Valor por defecto
 const titulo = ref('');
 const padreId = ref<number | null>(null); // Variable para el padre del nodo al actualizar
 
+// Estado para mostrar el formulario correcto
+const accionSeleccionada = ref<'agregar' | 'actualizar'>('agregar'); // Por defecto, es 'agregar'
+
 // Formatear los datos para la librería
 const formatearNodos = () => {
   return store.nodos.map(nodo => ({
     id: nodo.id,
     pid: nodo.padre_id || null, // `null` si no tiene jefe
     name: nodo.nombre, // Usar 'name' para que funcione con la librería
-    title: nodo.titulo // Usar 'title' en lugar de 'tipo_cargo'
+    title: nodo.titulo, // Usar 'title' en lugar de 'tipo_cargo'
   }));
 };
 
@@ -31,8 +34,9 @@ const inicializarOrganigrama = () => {
       nodes: formatearNodos(),
       nodeBinding: {
         field_0: 'name',   // Mostrar el nombre del nodo
-        field_1: 'title'   // Mostrar el tipo de cargo del nodo
+        field_1: 'title',   // Mostrar el tipo de cargo del nodo
       },
+      template: 'diva', // Usar la plantilla personalizada
     });
 
     chart.on('click', (sender, args) => {
@@ -77,17 +81,21 @@ const agregarNodoHijo = async () => {
   }
 };
 
-// Eliminar nodo
-const eliminarNodo = async () => {
-  if (!nodeIdSeleccionado.value) return;
-
+// Agregar nodo inicial
+const agregarNodoInicial = async () => {
   try {
-    await store.eliminarNodo(<number>nodeIdSeleccionado.value);
-    nodeIdSeleccionado.value = null;
+    await store.agregarNodo({
+      nombre: nombre.value,
+      tipo_cargo: tipoCargo.value,
+      padre_id: null, // No tiene padre
+      titulo: titulo.value
+    });
+
+    // Recargar organigrama y actualizar el estado de los nodos
     await store.cargarNodos();
     inicializarOrganigrama();
   } catch (error) {
-    console.error('Error al eliminar nodo:', error);
+    console.error('Error al agregar nodo inicial:', error);
   }
 };
 
@@ -118,6 +126,20 @@ const actualizarNodo = async () => {
   }
 };
 
+// Eliminar nodo
+const eliminarNodo = async () => {
+  if (!nodeIdSeleccionado.value) return;
+
+  try {
+    await store.eliminarNodo(<number>nodeIdSeleccionado.value);
+    nodeIdSeleccionado.value = null;
+    await store.cargarNodos();
+    inicializarOrganigrama();
+  } catch (error) {
+    console.error('Error al eliminar nodo:', error);
+  }
+};
+
 // Cargar los nodos al inicio
 onMounted(async () => {
   await store.cargarNodos();
@@ -130,14 +152,43 @@ onMounted(async () => {
     <div ref="chartContainer" class="w-3/4" style="height: 600px;"></div>
 
     <!-- Contenedor para formularios y botones -->
-    <div class="w-1/4 ml-4 space-y-4">
-      <div v-if="nodeIdSeleccionado !== null" class="p-4 border border-gray-300 rounded-lg shadow-lg">
+    <div class="w-1/4 pl-20 space-y-4">
+      <!-- Selector de acción (agregar o actualizar) -->
+      <div class="mb-4 flex flex-col w-[450px]">
+        <label class="mr-4">
+          <input type="radio" v-model="accionSeleccionada" value="agregar" class="mr-2"> Agregar Nodo
+        </label>
+        <label>
+          <input type="radio" v-model="accionSeleccionada" value="actualizar" class="mr-2"> Actualizar o eliminar Nodo
+        </label>
+      </div>
+
+      <!-- Mostrar formulario de acuerdo a la acción seleccionada -->
+      <div v-if="accionSeleccionada === 'agregar'" class="p-4 border border-gray-300 rounded-lg shadow-lg">
+        <h3 class="text-xl font-semibold mb-4">Agregar Nodo</h3>
+
+        <form @submit.prevent="agregarNodoInicial" class="space-y-4">
+          <input v-model="nombre" placeholder="Nombre del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+          <input v-model="titulo" placeholder="Titulo del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+          <select v-model="tipoCargo" required class="w-full p-2 border border-gray-300 rounded-md">
+            <option value="directo">Directo</option>
+            <option value="asesoria">Asesoria</option>
+          </select>
+
+          <button type="submit" class="w-full bg-sky-600 text-white py-2 rounded-md">Agregar Nodo Inicial</button>
+        </form>
+      </div>
+
+      <div v-if="accionSeleccionada === 'actualizar' && nodeIdSeleccionado !== null"
+        class="p-4 border border-gray-300 rounded-lg shadow-lg">
         <h3 class="text-xl font-semibold mb-4">Actualizar Nodo</h3>
 
         <!-- Formulario para actualizar nodo -->
         <form @submit.prevent="actualizarNodo" class="space-y-4">
           <input v-model="nombre" placeholder="Nombre del Nodo" required
-            class="w-full p-2 border border-gray-300 rounded-md" />
+            class="w-full p-2 border border-gray-300 rounded-md my-3" />
           <input v-model="titulo" placeholder="Titulo del Nodo" required
             class="w-full p-2 border border-gray-300 rounded-md" />
 
@@ -159,22 +210,20 @@ onMounted(async () => {
         <button @click="eliminarNodo" class="w-full bg-red-600 text-white py-2 rounded-md mt-4">Eliminar Nodo</button>
       </div>
 
+      <!-- Formulario para agregar un nodo hijo (solo si un nodo está seleccionado) -->
       <div v-if="nodeIdSeleccionado !== null" class="p-4 border border-gray-300 rounded-lg shadow-lg">
         <h3 class="text-xl font-semibold mb-4">Agregar Nodo Hijo</h3>
-
-        <!-- Formulario para agregar nodo hijo -->
         <form @submit.prevent="agregarNodoHijo" class="space-y-4">
-          <input v-model="nombre" placeholder="Nombre del Nodo" required
+          <input v-model="nombre" placeholder="Nombre del Nodo Hijo" required
             class="w-full p-2 border border-gray-300 rounded-md" />
-          <input v-model="titulo" placeholder="Titulo del Nodo" required
+          <input v-model="titulo" placeholder="Titulo del Nodo Hijo" required
             class="w-full p-2 border border-gray-300 rounded-md" />
-
           <select v-model="tipoCargo" required class="w-full p-2 border border-gray-300 rounded-md">
             <option value="directo">Directo</option>
             <option value="asesoria">Asesoria</option>
           </select>
 
-          <button type="submit" class="w-full bg-sky-600 text-white py-2 rounded-md">Agregar Nodo</button>
+          <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-md">Agregar Nodo Hijo</button>
         </form>
       </div>
     </div>
