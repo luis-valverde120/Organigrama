@@ -125,54 +125,75 @@ onMounted(async () => {
 });
 </script>
 
-
 <template>
-  <div class="w-3/4">
-    <div ref="chartContainer" class="w-full" style="width: 100%; height: 600px;"></div>
+  <div class="flex">
+    <div ref="chartContainer" class="w-3/4" style="height: 600px;"></div>
 
-    <!-- Modal o Formulario para Agregar Nodo -->
-    <div v-if="nodeIdSeleccionado !== null">
-      <h3>Agregar Nodo Hijo</h3>
-      <form @submit.prevent="agregarNodoHijo">
-        <input v-model="nombre" placeholder="Nombre del Nodo" required class="bg-white border text-black" />
-        <input v-model="titulo" placeholder="Titulo del Nodo" required class="bg-white border text-black" />
-        <select v-model="tipoCargo" required class="bg-white border text-black">
-          <option value="directo" class="bg-white text-black">Directo</option>
-          <option value="asesoria" class="bg-white text-black">Asesoria</option>
-        </select>
-        <button type="submit" class="bg-sky-600 text-white">Agregar Nodo</button>
-      </form>
-      <button @click="eliminarNodo" class="bg-red-600 text-white mt-4">Eliminar Nodo</button>
-    </div>
+    <!-- Contenedor para formularios y botones -->
+    <div class="w-1/4 ml-4 space-y-4">
+      <div v-if="nodeIdSeleccionado !== null" class="p-4 border border-gray-300 rounded-lg shadow-lg">
+        <h3 class="text-xl font-semibold mb-4">Actualizar Nodo</h3>
 
-    <!-- Modal o Formulario para Actualizar Nodo -->
-    <div v-if="nodeIdSeleccionado !== null">
-      <h3>Actualizar Nodo</h3>
-      <form @submit.prevent="actualizarNodo">
-        <input v-model="nombre" placeholder="Nombre del Nodo" required class="bg-white border text-black" />
-        <input v-model="titulo" placeholder="Titulo del Nodo" required class="bg-white border text-black" />
-        <select v-model="tipoCargo" required class="bg-white border text-black">
-          <option value="directo" class="bg-white text-black">Directo</option>
-          <option value="asesoria" class="bg-white text-black">Asesoria</option>
-        </select>
-        <!-- Selección del nuevo padre del nodo -->
-        <select v-model="padreId" class="bg-white border text-black">
-          <option value="" disabled selected>Seleccionar un nuevo padre</option>
-          <option v-for="nodo in store.nodos" :key="nodo.id" :value="nodo.id">
-            {{ nodo.nombre }} <!-- Solo se muestra el nombre del nodo -->
-          </option>
-        </select>
-        <button type="submit" class="bg-sky-600 text-white">Actualizar Nodo</button>
-      </form>
+        <!-- Formulario para actualizar nodo -->
+        <form @submit.prevent="actualizarNodo" class="space-y-4">
+          <input v-model="nombre" placeholder="Nombre del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+          <input v-model="titulo" placeholder="Titulo del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+
+          <select v-model="tipoCargo" required class="w-full p-2 border border-gray-300 rounded-md">
+            <option value="directo">Directo</option>
+            <option value="asesoria">Asesoria</option>
+          </select>
+
+          <!-- Selección del nuevo padre del nodo -->
+          <select v-model="padreId" class="w-full p-2 border border-gray-300 rounded-md">
+            <option value="" disabled selected>Seleccionar un nuevo padre</option>
+            <option v-for="nodo in store.nodos" :key="nodo.id" :value="nodo.id">{{ nodo.nombre }}</option>
+          </select>
+
+          <button type="submit" class="w-full bg-sky-600 text-white py-2 rounded-md">Actualizar Nodo</button>
+        </form>
+
+        <!-- Botón de eliminar -->
+        <button @click="eliminarNodo" class="w-full bg-red-600 text-white py-2 rounded-md mt-4">Eliminar Nodo</button>
+      </div>
+
+      <div v-if="nodeIdSeleccionado !== null" class="p-4 border border-gray-300 rounded-lg shadow-lg">
+        <h3 class="text-xl font-semibold mb-4">Agregar Nodo Hijo</h3>
+
+        <!-- Formulario para agregar nodo hijo -->
+        <form @submit.prevent="agregarNodoHijo" class="space-y-4">
+          <input v-model="nombre" placeholder="Nombre del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+          <input v-model="titulo" placeholder="Titulo del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+
+          <select v-model="tipoCargo" required class="w-full p-2 border border-gray-300 rounded-md">
+            <option value="directo">Directo</option>
+            <option value="asesoria">Asesoria</option>
+          </select>
+
+          <button type="submit" class="w-full bg-sky-600 text-white py-2 rounded-md">Agregar Nodo</button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
-
-
 <style scoped>
-h2 {
-  text-align: center;
-  margin-bottom: 10px;
+/* Estilo general para los formularios y botones */
+input,
+select {
+  transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: #4CAF50;
+}
+
+button:hover {
+  opacity: 0.9;
 }
 </style>
