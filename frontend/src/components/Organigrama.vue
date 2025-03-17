@@ -14,6 +14,9 @@ const tipoCargo = ref<'directo' | 'asesoria'>('directo'); // Valor por defecto
 const titulo = ref('');
 const padreId = ref<number | null>(null); // Variable para el padre del nodo al actualizar
 
+// Verificar si hay nodos en el organigrama
+const tieneNodos = ref(false);
+
 // Formatear los datos para la librería
 const formatearNodos = () => {
   return store.nodos.map(nodo => ({
@@ -77,7 +80,7 @@ const agregarNodoHijo = async () => {
   }
 };
 
-// Eliminar nodo
+// eliminar nodo
 const eliminarNodo = async () => {
   if (!nodeIdSeleccionado.value) return;
 
@@ -85,6 +88,11 @@ const eliminarNodo = async () => {
     await store.eliminarNodo(<number>nodeIdSeleccionado.value);
     nodeIdSeleccionado.value = null;
     await store.cargarNodos();
+
+    // Actualizar el estado de si tiene nodos
+    tieneNodos.value = store.nodos.length > 0;  // Verifica si aún hay nodos
+
+    // Recargar el organigrama
     inicializarOrganigrama();
   } catch (error) {
     console.error('Error al eliminar nodo:', error);
@@ -118,9 +126,29 @@ const actualizarNodo = async () => {
   }
 };
 
+// Modificar después de agregar un nodo inicial
+const agregarNodoInicial = async () => {
+  try {
+    await store.agregarNodo({
+      nombre: nombre.value,
+      tipo_cargo: tipoCargo.value,
+      padre_id: null, // No tiene padre
+      titulo: titulo.value
+    });
+
+    // Recargar organigrama y actualizar el estado de los nodos
+    await store.cargarNodos();
+    tieneNodos.value = store.nodos.length > 0;  // Actualiza el estado de los nodos
+    inicializarOrganigrama();
+  } catch (error) {
+    console.error('Error al agregar nodo inicial:', error);
+  }
+};
+
 // Cargar los nodos al inicio
 onMounted(async () => {
   await store.cargarNodos();
+  tieneNodos.value = store.nodos.length > 0;
   inicializarOrganigrama();
 });
 </script>
@@ -131,6 +159,24 @@ onMounted(async () => {
 
     <!-- Contenedor para formularios y botones -->
     <div class="w-1/4 ml-4 space-y-4">
+      <!-- Mostrar formulario para agregar el primer nodo -->
+      <div v-if="!tieneNodos" class="p-4 border border-gray-300 rounded-lg shadow-lg">
+        <h3 class="text-xl font-semibold mb-4">Agregar Nodo Inicial</h3>
+
+        <form @submit.prevent="agregarNodoInicial" class="space-y-4">
+          <input v-model="nombre" placeholder="Nombre del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+          <input v-model="titulo" placeholder="Titulo del Nodo" required
+            class="w-full p-2 border border-gray-300 rounded-md" />
+          <select v-model="tipoCargo" required class="w-full p-2 border border-gray-300 rounded-md">
+            <option value="directo">Directo</option>
+            <option value="asesoria">Asesoria</option>
+          </select>
+
+          <button type="submit" class="w-full bg-sky-600 text-white py-2 rounded-md">Agregar Nodo Inicial</button>
+        </form>
+      </div>
+
       <div v-if="nodeIdSeleccionado !== null" class="p-4 border border-gray-300 rounded-lg shadow-lg">
         <h3 class="text-xl font-semibold mb-4">Actualizar Nodo</h3>
 
