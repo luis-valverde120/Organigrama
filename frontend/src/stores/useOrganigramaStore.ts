@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { fetchNodos, addNodo, deleteNodo } from '../services/apiService';
+import { fetchNodos, addNodo, deleteNodo, updateNodo } from '../services/apiService';
 import type { Nodo } from '@/types';
 
 export const useOrganigramaStore = defineStore('organigrama', () => {
@@ -47,6 +47,24 @@ export const useOrganigramaStore = defineStore('organigrama', () => {
     }
   };
 
+  // Actualizar un nodo
+  const actualizarNodo = async (id: number, updatedData: Omit<Nodo, 'id'>) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const updatedNodo = await updateNodo(id, updatedData); // Llamada al servicio para actualizar el nodo
+      const index = nodos.value.findIndex((nodo) => nodo.id === id);
+      if (index !== -1) {
+        nodos.value[index] = updatedNodo; // Actualiza el nodo en el array de nodos
+      }
+    } catch (err) {
+      error.value = 'Error al actualizar el nodo';
+      console.error(err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     nodos,
     loading,
@@ -54,5 +72,6 @@ export const useOrganigramaStore = defineStore('organigrama', () => {
     cargarNodos,
     agregarNodo,
     eliminarNodo,
+    actualizarNodo,
   };
 });

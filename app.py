@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
 from infrastructure.database import db, init_db
@@ -23,6 +24,7 @@ def create_app():
 
     # Inicializar la base de datos
     init_db(app) 
+    migrate = Migrate(app, db)
 
     # Registrar blueprints (rutas)
     app.register_blueprint(organigrama_blueprint, name="organigrama_v2")

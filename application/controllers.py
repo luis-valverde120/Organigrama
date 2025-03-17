@@ -34,3 +34,12 @@ def delete_nodo(id):
     if service.eliminar_nodo(id):
         return '',204
     return jsonify({"error": "Nodo no encontrado"}), 404
+
+@organigrama_blueprint.route('/nodos/<int:id>', methods=['PUT'])
+def update_nodo(id):
+    """Actualizar un nodo del organigrama"""
+    data = request.json
+    nodo = service.actualizar_nodo(id, data)  # Llama al servicio para actualizar el nodo
+    if nodo:
+        return jsonify(nodo.__dict__)
+    return jsonify({"error": "Nodo no encontrado"}), 404
