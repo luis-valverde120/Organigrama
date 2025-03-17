@@ -5,7 +5,7 @@ import Organigrama from '@/components/Organigrama.vue';
 </script>
 
 <template>
-  <main>
+  <main class="w-full">
     <Organigrama />
   </main>
 </template>

@@ -22,3 +22,9 @@ export const deleteNodo = async (id: number) => {
   const response = await axios.delete(`${API_BASE_URL}/nodos/${id}`);
   return response.status === 204;
 }
+
+// Actualizar un nodo
+export const updateNodo = async (id: number, updatedData: any) => {
+  const response = await axios.put(`${API_BASE_URL}/nodos/${id}`, updatedData);
+  return response.data;
+};

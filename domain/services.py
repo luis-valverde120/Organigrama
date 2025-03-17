@@ -48,3 +48,14 @@ class OrganigramaService:
         :return: Nodo si existe, None si no se encuentra
         """
         return self.repo.obtener_nodo_por_id(id)
+
+    def actualizar_nodo(self, id: int, data: dict) -> Optional[Nodo]:
+        """
+        Actualiza un nodo del organigrama.
+
+        :param id: Identificador del nodo.
+        :param data: Datos actualizados del nodo.
+        :return: Nodo actualizado si existe, None si no se encuentra.
+        """
+        return self.repo.actualizar_nodo(id, data)
+

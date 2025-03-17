@@ -24,7 +24,7 @@ class NodoRepository:
         nuevo_nodo = NodoModel(**data)
         self.session.add(nuevo_nodo)
         self.session.commit()
-        return Nodo(nuevo_nodo.id, nuevo_nodo.nombre, nuevo_nodo.tipo_cargo, nuevo_nodo.padre_id)
+        return Nodo(nuevo_nodo.id, nuevo_nodo.nombre, nuevo_nodo.titulo, nuevo_nodo.tipo_cargo , nuevo_nodo.padre_id)
 
     def obtener_nodos(self) -> List[Nodo]:
         """
@@ -33,7 +33,7 @@ class NodoRepository:
         :return: Lista de nodos.
         """
         nodos = self.session.query(NodoModel).all()
-        return [Nodo(n.id, n.nombre, n.tipo_cargo, n.padre_id) for n in nodos]
+        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.padre_id) for n in nodos]
 
     def obtener_nodo_por_id(self, id: int) -> Optional[Nodo]:
         """
@@ -44,7 +44,7 @@ class NodoRepository:
         """
         nodo = self.session.get(NodoModel, id)
         if nodo:
-            return Nodo(nodo.id, nodo.nombre, nodo.tipo_cargo, nodo.padre_id)
+            return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.padre_id)
         return None
 
     def eliminar_nodo(self, id: int) -> bool:
@@ -61,3 +61,22 @@ class NodoRepository:
             return True
         return False
         
+    def actualizar_nodo(self, id, data: dict) -> Optional[Nodo]:
+        """
+        Actualiza un nodo en la base de datos.
+
+        :param id: Identificador del nodo.
+        :param data: Datos actualizados del nodo.
+        :return: Nodo actualizado si existe, None si no se encuentra.
+        """
+        nodo = self.session.get(NodoModel, id)
+        if nodo:
+            # Actualizar los atributos del nodo
+            nodo.nombre = data.get('nombre', nodo.nombre)
+            nodo.titulo = data.get('titulo', nodo.titulo)
+            nodo.tipo_cargo = data.get('tipo_cargo', nodo.tipo_cargo)
+            nodo.padre_id = data.get('padre_id', nodo.padre_id)
+            
+            self.session.commit()  # Guardar los cambios en la base de datos
+            return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.padre_id)
+        return None
