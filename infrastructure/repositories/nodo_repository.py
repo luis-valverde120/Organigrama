@@ -14,7 +14,6 @@ class NodoRepository:
         """
         self.session = session or db.session
 
-
     def agregar_nodo(self, data: dict) -> Nodo:
         """
         Agrega un nuevo nodo a la base de datos.
@@ -63,11 +62,13 @@ class NodoRepository:
         :return: Nodo si existe, None si no encuentra
         """
         nodo = self.session.get(NodoModel, id)
+        if not nodo:
+            return None
         return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.padre_id)
 
     def eliminar_nodo(self, id: int) -> bool:
         """
-        Elimina unnodo de la base de datos.
+        Elimina un nodo de la base de datos.
 
         :param id: Identificador del nodo
         :return: True si el nodo fue eliminado, False si no se encuentra el nodo
@@ -88,6 +89,7 @@ class NodoRepository:
     def actualizar_nodo(self, id: int, data: dict) -> Optional[Nodo]:
         """
         Actualiza un nodo en la base de datos.
+
         :param id: Identificador del nodo.
         :param data: Datos actualizados del nodo.
         :return: Nodo actualizado si existe, None si no se encuentra.
@@ -106,3 +108,14 @@ class NodoRepository:
         except Exception as e:
             self.session.rollback()
             raise RuntimeError(f"Error al actualizar nodo: {str(e)}")
+
+    def eliminar_nodos_hijos(self, nodo_id: int):
+        """
+        Elimina los nodos hijos antes de eliminar un nodo principal.
+
+        :param nodo_id: ID del nodo a eliminar.
+        """
+        nodos_hijos = self.session.query(NodoModel).filter(NodoModel.padre_id == nodo_id).all()
+        for nodo_hijo in nodos_hijos:
+            self.session.delete(nodo_hijo)
+        self.session.commit()

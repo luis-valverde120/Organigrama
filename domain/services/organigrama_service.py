@@ -1,68 +1,58 @@
 from domain.models import Organigrama
 from infrastructure.repositories import OrganigramaRepository
-from infrastructure.repositories import NodoRepository
 
 class OrganigramaService:
     """Servicio para manejar organigramas"""
 
-    def __init__(self, organigrama_repo: OrganigramaRepository = None, nodo_repo: NodoRepository = None):
-        self.organigrama_repo = organigrama_repo or OrganigramaRepository()
-        self.nodo_repo = nodo_repo or NodoRepository()
+    def __init__(self, organigrama_repo: OrganigramaRepository = None):
+        """
+        Inicializa el servicio de organigrama.
 
-    def obtener_organigramas(self, usuario_id: int):
+        :param organigrama_repo: Repositorio de organigramas (opcional).
         """
-        Obtiene todos los organigramas del usuario.
-        
-        :param usuario_id: ID del usuario.
-        :return: Lista de organigramas.
-        """
-        return self.organigrama_repo.obtener_organigramas_por_usuario(usuario_id)
+        self.organigrama_repo = organigrama_repo or OrganigramaRepository()
 
     def agregar_organigrama(self, data: dict) -> Organigrama:
         """
         Agrega un nuevo organigrama.
-        
-        :param data: Datos del organigrama.
+
+        :param data: Datos del organigrama (nombre, descripcion, etc.).
         :return: Organigrama creado.
         """
+        return self.organigrama_repo.agregar_organigrama(data)
 
-        return self.organigrama_repo.guardar(data)
+    def obtener_organigramas(self) -> list[Organigrama]:
+        """
+        Obtiene todos los organigramas.
 
-    def eliminar_organigrama(self, organigrama_id: int) -> bool:
+        :return: Lista de organigramas.
         """
-        Elimina un organigrama y sus nodos asociados.
-        
-        :param organigrama_id: ID del organigrama.
-        :return: True si se eliminó, False en caso contrario.
-        """
-        organigrama = self.organigrama_repo.obtener_organigrama_por_id(organigrama_id)
-        if not organigrama:
-            return False
-        
-        # Eliminar nodos asociados al organigrama
-        self.nodo_repo.eliminar_nodos_por_organigrama(organigrama_id)
-        return self.organigrama_repo.eliminar(organigrama)
+        return self.organigrama_repo.obtener_organigramas()
 
-    def actualizar_nombre_organigrama(self, organigrama_id: int, nuevo_nombre: str) -> Organigrama:
+    def obtener_organigrama_por_id(self, id: int) -> Organigrama:
         """
-        Actualiza el nombre de un organigrama.
-        
-        :param organigrama_id: ID del organigrama.
-        :param nuevo_nombre: Nuevo nombre para el organigrama.
-        :return: Organigrama actualizado.
-        """
-        return self.organigrama_repo.actualizar_nombre(organigrama_id, nuevo_nombre)
+        Obtiene un organigrama por su ID.
 
-    def agregar_nodo(self, data: dict):
+        :param id: Identificador del organigrama.
+        :return: Organigrama si existe, None si no se encuentra.
         """
-        Agrega un nodo al organigrama.
-        
-        :param data: Datos del nodo, incluyendo el ID del organigrama.
-        :return: Nodo creado.
-        :raises ValueError: Si falta el organigrama_id en los datos.
+        return self.organigrama_repo.obtener_organigrama_por_id(id)
+
+    def eliminar_organigrama(self, id: int) -> bool:
         """
-        if 'organigrama_id' not in data:
-            raise ValueError("El campo 'organigrama_id' es obligatorio para agregar un nodo.")
-        
-        # Crear el nodo usando el repositorio de nodos
-        return self.nodo_repo.agregar_nodo(data)
+        Elimina un organigrama por su ID.
+
+        :param id: Identificador del organigrama.
+        :return: True si se eliminó correctamente, False si no se encuentra.
+        """
+        return self.organigrama_repo.eliminar_organigrama(id)
+
+    def actualizar_organigrama(self, id: int, data: dict) -> Organigrama:
+        """
+        Actualiza un organigrama existente.
+
+        :param id: Identificador del organigrama.
+        :param data: Datos actualizados del organigrama.
+        :return: Organigrama actualizado si existe, None si no se encuentra.
+        """
+        return self.organigrama_repo.actualizar_organigrama(id, data)

@@ -1,24 +1,32 @@
 from domain.models import Nodo
-from infrastructure.repositories import NodoRepository
+from infrastructure.repositories import NodoRepository, OrganigramaRepository
 
 class NodoService:
     """Servicio para manejar nodos"""
 
-    def __init__(self, nodo_repo: NodoRepository = None):
+    def __init__(self, nodo_repo: NodoRepository = None, organigrama_repo: OrganigramaRepository = None):
         """
         Inicializa el servicio de nodos.
 
         :param nodo_repo: Repositorio de nodos (opcional).
+        :param organigrama_repo: Repositorio de organigramas (opcional).
         """
         self.nodo_repo = nodo_repo or NodoRepository()
+        self.organigrama_repo = organigrama_repo or OrganigramaRepository()
 
     def agregar_nodo(self, data: dict) -> Nodo:
         """
         Agrega un nuevo nodo.
 
-        :param data: Datos del nodo (nombre, tipo_cargo, padre_id, etc.).
+        :param data: Datos del nodo (nombre, tipo_cargo, organigrama_id, etc.).
         :return: Nodo creado.
+        :raises ValueError: Si el organigrama no existe.
         """
+        # Validar si el organigrama_id existe
+        organigrama_id = data.get('organigrama_id')
+        if not organigrama_id or not self.organigrama_repo.obtener_organigrama_por_id(organigrama_id):
+            raise ValueError("El organigrama asociado no es válido o no existe.")
+
         return self.nodo_repo.agregar_nodo(data)
 
     def obtener_nodos(self) -> list[Nodo]:

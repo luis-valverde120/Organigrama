@@ -1,7 +1,7 @@
-from domain.models import Organigrama
-from infrastructure.database import OrganigramaModel
-from infrastructure.database import db
+from typing import List, Optional
 from sqlalchemy.orm import Session
+from domain.models import Organigrama
+from infrastructure.database import db, OrganigramaModel
 
 class OrganigramaRepository:
     """Repositorio para interactuar con la base de datos de organigramas"""
@@ -14,58 +14,90 @@ class OrganigramaRepository:
         """
         self.session = session or db.session
 
-    def guardar(self, data: dict) -> Organigrama:
+    def agregar_organigrama(self, data: dict) -> Organigrama:
         """
-        Guarda un nuevo organigrama en la base de datos.
+        Agrega un nuevo organigrama a la base de datos.
 
-        :param organigrama: Organigrama a guardar.
-        :return: Organigrama guardado.
+        :param data: Datos del organigrama (nombre, descripcion, etc.).
+        :return: Organigrama creado
         """
-        nuevo_organigrama = OrganigramaModel(**data)
-        self.session.add(nuevo_organigrama)
-        self.session.commit()
-        return Organigrama(nuevo_organigrama.id, nuevo_organigrama.nombre, nuevo_organigrama.descripcion, nuevo_organigrama.usuario_id)
+        try:
+            organigrama_data = {
+                "nombre": data["nombre"],
+                "descripcion": data["descripcion"],
+            }
 
-    def obtener_organigramas_por_usuario(self, usuario_id: int):
+            nuevo_organigrama = OrganigramaModel(**organigrama_data)
+            self.session.add(nuevo_organigrama)
+            self.session.commit()
+            return Organigrama(
+                nuevo_organigrama.id,
+                nuevo_organigrama.nombre,
+                nuevo_organigrama.descripcion,
+            )
+        except Exception as e:
+            self.session.rollback()
+            raise RuntimeError(f"Error al agregar organigrama: {str(e)}")
+
+    def obtener_organigramas(self) -> List[Organigrama]:
         """
-        Obtiene todos los organigramas de un usuario.
+        Obtiene todos los organigramas de la base de datos
 
-        :param usuario_id: ID del usuario.
         :return: Lista de organigramas.
         """
-        return self.session.query(Organigrama).filter_by(usuario_id=usuario_id).all()
+        organigrama = self.session.query(OrganigramaModel).all()
+        return [Organigrama(o.id, o.nombre, o.descripcion) for o in organigrama]
 
-    def obtener_organigrama_por_id(self, organigrama_id: int) -> Organigrama:
+    def obtener_organigrama_por_id(self, id: int) -> Optional[Organigrama]:
         """
-        Obtiene un organigrama por ID.
+        Obtener un organigrama por ID
 
-        :param organigrama_id: ID del organigrama.
-        :return: Organigrama si existe, None si no se encuentra.
+        :param id: Identificador del organigrama
+        :return: Organigrama si existe, None si no encuentra
         """
-        return self.session.query(Organigrama).get(organigrama_id)
-
-    def eliminar(self, organigrama: Organigrama) -> bool:
-        """
-        Elimina un organigrama.
-
-        :param organigrama: Organigrama a eliminar.
-        :return: True si se eliminó correctamente.
-        """
-        self.session.delete(organigrama)
-        self.session.commit()
-        return True
-
-    def actualizar_nombre(self, organigrama_id: int, nuevo_nombre: str) -> Organigrama:
-        """
-        Actualiza el nombre de un organigrama.
-
-        :param organigrama_id: ID del organigrama a actualizar.
-        :param nuevo_nombre: Nuevo nombre para el organigrama.
-        :return: Organigrama actualizado.
-        """
-        organigrama = self.obtener_organigrama_por_id(organigrama_id)
+        organigrama = self.session.get(OrganigramaModel, id)
         if not organigrama:
             return None
-        organigrama.nombre = nuevo_nombre
-        self.session.commit()
-        return organigrama
+        return Organigrama(organigrama.id, organigrama.nombre, organigrama.descripcion)
+
+    def eliminar_organigrama(self, id: int) -> bool:
+        """
+        Elimina un organigrama de la base de datos.
+
+        :param id: Identificador del organigrama
+        :return: True si el organigrama fue eliminado, False si no se encuentra el organigrama
+        """
+        try:
+            organigrama = self.session.get(OrganigramaModel, id)
+            if not organigrama:
+                return False
+
+            self.session.delete(organigrama)
+            self.session.commit()
+            return True
+        except Exception as e:
+            self.session.rollback()
+            raise RuntimeError(f"Error al eliminar organigrama: {str(e)}")
+
+    def actualizar_organigrama(self, id: int, data: dict) -> Optional[Organigrama]:
+        """
+        Actualiza un organigrama en la base de datos.
+
+        :param id: Identificador del organigrama.
+        :param data: Datos actualizados del organigrama.
+        :return: Organigrama actualizado si existe, None si no se encuentra.
+        """
+        try:
+            organigrama = self.session.get(OrganigramaModel, id)
+            if not organigrama:
+                return None
+
+            for key, value in data.items():
+                if hasattr(organigrama, key):
+                    setattr(organigrama, key, value)
+
+            self.session.commit()
+            return Organigrama(organigrama.id, organigrama.nombre, organigrama.descripcion)
+        except Exception as e:
+            self.session.rollback()
+            raise RuntimeError(f"Error al actualizar organigrama: {str(e)}")

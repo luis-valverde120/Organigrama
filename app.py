@@ -5,7 +5,9 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
 from infrastructure.database import db, init_db
-from application.controllers import organigrama_blueprint
+from application.nodo_routes import nodo_bp
+from application.oranigrama_routes import organigrama_bp
+from application.usuario_routes import auth_bp
 
 def create_app():
     """Factory function para crear la aplicacion flask"""
@@ -25,15 +27,14 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-    # Registrar blueprints (rutas)
-    app.register_blueprint(organigrama_blueprint)
-
     # Inicializar la base de datos
     init_db(app) 
     migrate = Migrate(app, db)
 
     # Registrar blueprints (rutas)
-    app.register_blueprint(organigrama_blueprint, name="organigrama_v2")
+    app.register_blueprint(auth_bp, use_prefix='/api')
+    app.register_blueprint(organigrama_bp, use_prefix='/api')
+    app.register_blueprint(nodo_bp, use_prefix='/api')
 
     CORS(app)
 
