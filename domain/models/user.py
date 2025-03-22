@@ -2,7 +2,7 @@ import bcrypt
 
 class Usuario:
     """Representa un usaurio en el sistema"""
-    def __init__(self, id: int, nombre: str, usuario: str, email: str, password:str):
+    def __init__(self, id: int, nombre: str, username: str, email: str, password:str):
         """
         Inicializa un usuario con un identificador, nombre y correo electrónico.
 
@@ -12,7 +12,7 @@ class Usuario:
         """
         self.id = id
         self.nombre = nombre
-        self.usuario = usuario
+        self.username = username
         self.email = email
         self.password = self._hash_password(password) 
         self.organigramas = []
@@ -44,6 +44,20 @@ class Usuario:
         :param organigrama: Organigrama a agregar.
         """
         self.organigramas.append(organigrama)
+
+    def to_dict(self):
+        """
+        Convierte el objeto Usuario a un diccionario.
+
+        :return: Diccionario con los atributos del usuario.
+        """
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'username': self.username,
+            'email': self.email,
+            'password': self.password
+        }
 
     def __repr__(self):
         """

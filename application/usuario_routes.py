@@ -7,7 +7,7 @@ usuario_bp = Blueprint('usuario', __name__)
 # Inicialización del servicio
 usuario_service = UsuarioService()
 
-@usuario_bp.route('/registrar', methods=['POST'])
+@usuario_bp.route('/register', methods=['POST'])
 def registrar_usuario():
     """Registra un nuevo usuario"""
     data = request.get_json()

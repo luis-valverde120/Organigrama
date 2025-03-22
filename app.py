@@ -7,7 +7,7 @@ import os
 from infrastructure.database import db, init_db
 from application.nodo_routes import nodo_bp
 from application.oranigrama_routes import organigrama_bp
-from application.usuario_routes import auth_bp
+from application.usuario_routes import usuario_bp 
 
 def create_app():
     """Factory function para crear la aplicacion flask"""
@@ -32,11 +32,11 @@ def create_app():
     migrate = Migrate(app, db)
 
     # Registrar blueprints (rutas)
-    app.register_blueprint(auth_bp, use_prefix='/api')
+    app.register_blueprint(usuario_bp)
     app.register_blueprint(organigrama_bp, use_prefix='/api')
     app.register_blueprint(nodo_bp, use_prefix='/api')
 
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     return app
 

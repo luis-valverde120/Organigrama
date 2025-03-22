@@ -24,14 +24,44 @@ class UsuarioRepository:
         :return: Usuario creado
         """
         try:
-            data["password"] = generate_password_hash(data["password"], method="sha256")
-            usuario = UsuarioModel(**data)
+            data["password"] = generate_password_hash(data["password"], method="pbkdf2:sha256")
+            usuario = UsuarioModel(
+                nombre=data["nombre"],
+                username=data["username"],
+                correo=data["correo"],
+                password=data["password"],
+            )
             self.session.add(usuario)
             self.session.commit()
+                
             return Usuario(usuario.id, usuario.nombre, usuario.username, usuario.correo, usuario.password)
         except Exception as e:
             self.session.rollback()
             raise RuntimeError(f"Error al crear usuario: {str(e)}")
+    
+    def obtener_usuario_por_username(self, username: str) -> Optional[Usuario]:
+        """
+        Obtener un usuario por username
+        
+        :param username: Nombre de usuario
+        :return: Usuario si existe, None si no encuentra
+        """
+        usuario = self.session.query(UsuarioModel).filter_by(username=username).first()
+        if usuario:
+            return Usuario(usuario.id, usuario.nombre, usuario.username, usuario.correo, usuario.password)
+        return None  # Devolver None si no se encuentra ningún usuario
+    
+    def obtener_usuario_por_correo(self, correo: str) -> Optional[Usuario]: 
+        """
+        Obtener un usuario por correo
+        
+        :param correo: Correo del usuario
+        :return: Usuario si existe, None si no encuentra
+        """
+        usuario = self.session.query(UsuarioModel).filter_by(correo=correo).first()
+        if usuario:
+            return Usuario(usuario.id, usuario.nombre, usuario.username, usuario.correo, usuario.password)
+        return None  # Devolver None si no se encuentra ningún usuario
         
     def obtener_usuario_por_id(self, id: int) -> Optional[Usuario]:
         """
@@ -43,7 +73,7 @@ class UsuarioRepository:
         usuario = self.session.get(UsuarioModel, id)
         return Usuario(usuario.id, usuario.nombre, usuario.username, usuario.correo, usuario.password)
 
-    def verificar_credenciales(self, usuario: str, password: str) -> Optional[Usuario]:
+    def verificar_credenciales(self, username: str, password: str) -> Optional[Usuario]:
         """
         Verifica las credenciales del usuario.
         
@@ -51,7 +81,7 @@ class UsuarioRepository:
         :param password: Contraseña.
         :return: Usuario si las credenciales son validas, None en caso contrario.
         """
-        usuario_db = self.session.query(UsuarioModel).filter_by(usuario=usuario).first()
+        usuario_db = self.session.query(UsuarioModel).filter_by(username=username).first()
         if usuario_db and check_password_hash(usuario_db.password, password):
             return Usuario(usuario_db.id, usuario_db.nombre, usuario_db.username, usuario_db.correo, usuario_db.password)
         return None

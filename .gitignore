@@ -36,3 +36,5 @@ frontend/*.tsbuildinfo
 
 frontend/test-results/
 frontend/playwright-report/
+
+/migrations

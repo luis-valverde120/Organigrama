@@ -38,6 +38,20 @@ class Organigrama:
         """
         self.nodos = []
 
+    def to_dict(self):
+        """
+        Convierte el objeto Organigrama a un diccionario.
+
+        :return: Diccionario con los atributos del organigrama.
+        """
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'descripcion': self.descripcion,
+            'usuario_id': self.usuario_id,
+            'nodos': [nodo.to_dict() for nodo in self.nodos]
+        }
+
     def __repr__(self):
         """
         Representación en cadena del organigrama para depuración.

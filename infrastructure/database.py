@@ -19,11 +19,11 @@ class UsuarioModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    usuario = db.Column(db.String(100), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    correo = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
 
-    organigramas = db.relationship('OrganigramaModel', back_populates='usuario', cascade="all, delete")
+    organigramas = db.relationship('OrganigramaModel', back_populates='username', cascade="all, delete")
 
     def set_password(self, password):
         """Hash de la contraseña antes de guardarla."""
@@ -47,10 +47,10 @@ class OrganigramaModel(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
 
     # Relación con el modelo Usuario
-    usuario = db.relationship('UsuarioModel', back_populates='organigramas')
+    username = db.relationship('UsuarioModel', back_populates='organigramas')
 
     # Relación con el modelo Nodo
-    nodos = db.relationship('NodoModel', backref='organigrama', cascade="all, delete")
+    nodos = db.relationship('NodoModel', back_populates='organigrama', cascade="all, delete")
 
     def __repr__(self):
         return f"OrganigramaModel(id={self.id}, nombre={self.nombre})"
@@ -70,7 +70,7 @@ class NodoModel(db.Model):
     # Campos personalizables
     color_bg = db.Column(db.String(7), default="#FFFFFF")  # Color de fondo
     color_border = db.Column(db.String(7), default="#000000")  # Color del borde
-    color_text = db.Column(db.String(7), default="#000000")  # Color del texto
+    color_text = db.Column(db.String(7), default="#000000")  # Color sdel texto
 
     # Relación con el modelo Organigrama
     organigrama = db.relationship('OrganigramaModel', back_populates='nodos')
