@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
 from infrastructure.database import db, init_db
@@ -11,9 +12,14 @@ def create_app():
     # carga de variables de entorno
     load_dotenv()
 
-
     # Crear la aplicacion Flask
     app = Flask(__name__)
+
+    # Configuracion de la clave secreta jwt
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+
+    # Inicializar JWT
+    jwt = JWTManager(app)
 
     # Configuracion de la aplicacion
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')

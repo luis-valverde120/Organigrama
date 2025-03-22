@@ -1,4 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_migrate import Migrate
 
 # Crear una instancia de SQLAlchemy
 db = SQLAlchemy()
@@ -9,6 +12,49 @@ from flask_sqlalchemy import SQLAlchemy
 # Crear una instancia de SQLAlchemy
 db = SQLAlchemy()
 
+# Definir el modelo de Usuario
+class UsuarioModel(db.Model):
+    """Modelo de la tabla usuarios en la base de datos."""
+    __tablename__ = 'usuarios'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    usuario = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+
+    organigramas = db.relationship('OrganigramaModel', back_populates='usuario', cascade="all, delete")
+
+    def set_password(self, password):
+        """Hash de la contraseña antes de guardarla."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Verifica si la contraseña proporcionada coincide con la contraseña encriptada."""
+        return check_password_hash(self.password_hash, password)      
+
+    def __repr__(self):
+        return f"UsuarioModel(id={self.id}, nombre={self.nombre}, email={self.email})"
+
+# Definir el modelo de Organigrama
+
+class OrganigramaModel(db.Model):
+    """Modelo de la tabla organigramas en la base de datos."""
+    __tablename__ = 'organigramas'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+
+    # Relación con el modelo Usuario
+    usuario = db.relationship('UsuarioModel', back_populates='organigramas')
+
+    # Relación con el modelo Nodo
+    nodos = db.relationship('NodoModel', backref='organigrama', cascade="all, delete")
+
+    def __repr__(self):
+        return f"OrganigramaModel(id={self.id}, nombre={self.nombre})"
+
 # Definir el modelo de Nodo
 class NodoModel(db.Model):
     """Modelo de la tabla nodos en la base de datos."""
@@ -16,20 +62,21 @@ class NodoModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    titulo = db.Column(db.String(100), nullable=False)  # Cargo (ejemplo: CEO, Gerente, etc.)
-    tipo_cargo = db.Column(db.String(50), nullable=False)  # 'directo' o 'asesoria'
-    padre_id = db.Column(db.Integer, db.ForeignKey('nodos.id'))  # Clave foránea
+    titulo = db.Column(db.String(100), nullable=False)
+    tipo_cargo = db.Column(db.String(100), nullable=False)  
+    organigrama_id = db.Column(db.Integer, db.ForeignKey('organigramas.id', ondelete="CASCADE"), nullable=False)
+    padre_id = db.Column(db.Integer, db.ForeignKey('nodos.id'), nullable=True)
 
-    # Relación recursiva para representar la jerarquía
-    hijos = db.relationship(
-        'NodoModel',
-        backref=db.backref('padre', remote_side=[id]),  # Referencia al padre
-        foreign_keys=[padre_id]  # Especifica la columna de la clave foránea
-    )
+    # Campos personalizables
+    color_bg = db.Column(db.String(7), default="#FFFFFF")  # Color de fondo
+    color_border = db.Column(db.String(7), default="#000000")  # Color del borde
+    color_text = db.Column(db.String(7), default="#000000")  # Color del texto
 
-    def __repr__(self):
-        return f"NodoModel(id={self.id}, nombre={self.nombre}, titulo={self.titulo}, tipo_cargo={self.tipo_cargo})"
+    # Relación con el modelo Organigrama
+    organigrama = db.relationship('OrganigramaModel', back_populates='nodos')
 
+    # Relación con el modelo Nodo (hijos)
+    hijos = db.relationship('NodoModel', backref='padre', remote_side=[id], cascade="all, delete")
 
 def init_db(app):
     """
@@ -38,5 +85,6 @@ def init_db(app):
     :param app: Instancia de la aplicacion Flask.
     """
     db.init_app(app)
+    migrate = Migrate(app, db)
     with app.app_context():
         db.create_all()

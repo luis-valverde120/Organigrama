@@ -1,11 +1,21 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from domain.services import OrganigramaService
 
 
 # Crear un blueprint para las rutas
+auth_blueprint = Blueprint('auth', __name__)
 organigrama_blueprint = Blueprint('organigrama', __name__)
+
+# servicio de organigramas
 service = OrganigramaService()
 
+# ------------------ Autenticacion ------------------
+@auth_blueprint.route('/login', methods=['POST'])
+def login():
+    """Endpoint para autenticar un usuario y devolver un token JWT"""
+    data = request.json
+    token = UsuarioService().login(data['username'], data['password'])
 
 @organigrama_blueprint.route('/nodos', methods=['GET'])
 def get_nodos():
