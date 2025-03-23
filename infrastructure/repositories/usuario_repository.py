@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from domain.models import Usuario 
 from infrastructure.database import db, UsuarioModel
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import bcrypt
 
 class UsuarioRepository:
     """Repositorio para manejar en la base de dato."""
      
-    def __init__(self, session: Session =None):
+    def __init__(self, session: Session = None):
         """
         Inicializa el repositorio.
         
@@ -16,7 +16,7 @@ class UsuarioRepository:
         """
         self.session = session or db.session
 
-    def crear_usaurio(self, data: dict) -> Usuario:
+    def crear_usuario(self, data: dict) -> Usuario:
         """
         registra un nuevo usuario en la base de datos.
         
@@ -24,7 +24,8 @@ class UsuarioRepository:
         :return: Usuario creado
         """
         try:
-            data["password"] = generate_password_hash(data["password"], method="pbkdf2:sha256")
+            password = str(data["password"])
+            data["password"] = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
             usuario = UsuarioModel(
                 nombre=data["nombre"],
                 username=data["username"],

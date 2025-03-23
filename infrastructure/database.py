@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
+from werkzeug.security import generate_password_hash
 
 # Crear una instancia de SQLAlchemy
 db = SQLAlchemy()
@@ -21,20 +21,13 @@ class UsuarioModel(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
     correo = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.Text, nullable=False)
 
     organigramas = db.relationship('OrganigramaModel', back_populates='username', cascade="all, delete")
 
-    def set_password(self, password):
-        """Hash de la contraseña antes de guardarla."""
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        """Verifica si la contraseña proporcionada coincide con la contraseña encriptada."""
-        return check_password_hash(self.password_hash, password)      
 
     def __repr__(self):
-        return f"UsuarioModel(id={self.id}, nombre={self.nombre}, email={self.email})"
+        return f"UsuarioModel(id={self.id}, nombre={self.nombre}, email={self.correo})"
 
 # Definir el modelo de Organigrama
 

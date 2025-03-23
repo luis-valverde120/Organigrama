@@ -36,13 +36,13 @@ class TestUsuarioService(unittest.TestCase):
         }
         self.mock_repo.obtener_usuario_por_username.return_value = None
         self.mock_repo.obtener_usuario_por_correo.return_value = None
-        self.mock_repo.crear_usaurio.return_value = Usuario(1, "John Doe", "johndoe", "johndoe@example.com", "hashed_password")
+        self.mock_repo.crear_usuario.return_value = Usuario(1, "John Doe", "johndoe", "johndoe@example.com", "hashed_password")
 
         usuario = self.usuario_service.registrar_usuario(data)
 
         self.assertIsNotNone(usuario)
         self.assertEqual(usuario.nombre, "John Doe")
-        self.mock_repo.crear_usaurio.assert_called_once()
+        self.mock_repo.crear_usurio.assert_called_once()
 
     def test_validar_credenciales(self):
         """

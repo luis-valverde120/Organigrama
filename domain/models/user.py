@@ -1,7 +1,7 @@
 import bcrypt
 
 class Usuario:
-    """Representa un usaurio en el sistema"""
+    """Representa un usuario en el sistema"""
     def __init__(self, id: int, nombre: str, username: str, email: str, password:str):
         """
         Inicializa un usuario con un identificador, nombre y correo electrónico.

@@ -31,14 +31,15 @@ def login():
     tokens = usuario_service.validar_credenciales(data['username'], data['password'])
 
     if tokens:
-        return jsonify(tokens), 200
+        return jsonify(tokens), 200  # Asegúrate de devolver un JSON válido
     return jsonify({"error": "Credenciales incorrectas"}), 401
 
 @usuario_bp.route('/perfil', methods=['GET'])
-@jwt_required()  # Ruta protegida
+@jwt_required()
 def obtener_perfil():
     """Obtiene el perfil del usuario autenticado"""
     user_id = get_jwt_identity()
+    
     usuario = usuario_service.obtener_usuario_por_id(user_id)
     if usuario:
         return jsonify(usuario.to_dict()), 200
