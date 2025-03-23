@@ -24,43 +24,45 @@ class OrganigramaRepository:
         try:
             organigrama_data = {
                 "nombre": data["nombre"],
-                "descripcion": data["descripcion"],
+                "usuario_id": data["usuario_id"],
             }
 
+            # Descomponer el diccionario en argumentos de palabra clave
             nuevo_organigrama = OrganigramaModel(**organigrama_data)
             self.session.add(nuevo_organigrama)
             self.session.commit()
             return Organigrama(
                 nuevo_organigrama.id,
                 nuevo_organigrama.nombre,
-                nuevo_organigrama.descripcion,
             )
         except Exception as e:
             self.session.rollback()
             raise RuntimeError(f"Error al agregar organigrama: {str(e)}")
 
-    def obtener_organigramas(self) -> List[Organigrama]:
+    def obtener_organigramas(self, user_id: int) -> List[Organigrama]:
         """
-        Obtiene todos los organigramas de la base de datos
+        Obtiene todos los organigramas de un usuario.
 
+        :param user_id: ID del usuario.
         :return: Lista de organigramas.
         """
-        organigrama = self.session.query(OrganigramaModel).all()
-        return [Organigrama(o.id, o.nombre, o.descripcion) for o in organigrama]
+        organigramas = self.session.query(OrganigramaModel).filter_by(usuario_id=user_id).all()
+        return [Organigrama(o.id, o.nombre, o.usuario_id, o.nodos) for o in organigramas]
 
-    def obtener_organigrama_por_id(self, id: int) -> Optional[Organigrama]:
+    def obtener_organigrama_por_id(self, id: int, user_id: int) -> Optional[Organigrama]:
         """
-        Obtener un organigrama por ID
+        Obtener un organigrama por ID y user_id.
 
-        :param id: Identificador del organigrama
-        :return: Organigrama si existe, None si no encuentra
+        :param id: Identificador del organigrama.
+        :param user_id: ID del usuario propietario del organigrama.
+        :return: Organigrama si existe y pertenece al usuario, None si no se encuentra.
         """
-        organigrama = self.session.get(OrganigramaModel, id)
+        organigrama = self.session.query(OrganigramaModel).filter_by(id=id, usuario_id=user_id).first()
         if not organigrama:
-            return None
-        return Organigrama(organigrama.id, organigrama.nombre, organigrama.descripcion)
+            return None  # Devuelve None si no se encuentra el organigrama
+        return Organigrama(organigrama.id, organigrama.nombre, organigrama.usuario_id, organigrama.nodos)
 
-    def eliminar_organigrama(self, id: int) -> bool:
+    def eliminar_organigrama(self, id: int, user_id: int) -> bool:
         """
         Elimina un organigrama de la base de datos.
 
@@ -68,7 +70,7 @@ class OrganigramaRepository:
         :return: True si el organigrama fue eliminado, False si no se encuentra el organigrama
         """
         try:
-            organigrama = self.session.get(OrganigramaModel, id)
+            organigrama = self.session.query(OrganigramaModel).filter_by(id=id, usuario_id=user_id).first()
             if not organigrama:
                 return False
 
@@ -79,7 +81,7 @@ class OrganigramaRepository:
             self.session.rollback()
             raise RuntimeError(f"Error al eliminar organigrama: {str(e)}")
 
-    def actualizar_organigrama(self, id: int, data: dict) -> Optional[Organigrama]:
+    def actualizar_organigrama(self, id: int, data: dict, user_id: int) -> Optional[Organigrama]:
         """
         Actualiza un organigrama en la base de datos.
 
@@ -88,7 +90,7 @@ class OrganigramaRepository:
         :return: Organigrama actualizado si existe, None si no se encuentra.
         """
         try:
-            organigrama = self.session.get(OrganigramaModel, id)
+            organigrama = self.session.query(OrganigramaModel).filter_by(id=id, usuario_id=user_id).first()
             if not organigrama:
                 return None
 
@@ -97,7 +99,7 @@ class OrganigramaRepository:
                     setattr(organigrama, key, value)
 
             self.session.commit()
-            return Organigrama(organigrama.id, organigrama.nombre, organigrama.descripcion)
+            return Organigrama(organigrama.id, organigrama.nombre, organigrama.usuario_id)
         except Exception as e:
             self.session.rollback()
             raise RuntimeError(f"Error al actualizar organigrama: {str(e)}")

@@ -21,33 +21,34 @@ class OrganigramaService:
         """
         return self.organigrama_repo.agregar_organigrama(data)
 
-    def obtener_organigramas(self) -> list[Organigrama]:
+    def obtener_organigramas(self, user_id: int) -> list[Organigrama]:
         """
-        Obtiene todos los organigramas.
+        Obtiene todos los organigramas de un usuario.
 
+        :param user_id: ID del usuario.
         :return: Lista de organigramas.
         """
-        return self.organigrama_repo.obtener_organigramas()
+        return self.organigrama_repo.obtener_organigramas(user_id)
 
-    def obtener_organigrama_por_id(self, id: int) -> Organigrama:
+    def obtener_organigrama_por_id(self, id: int, user_id: int) -> Organigrama:
         """
         Obtiene un organigrama por su ID.
 
         :param id: Identificador del organigrama.
         :return: Organigrama si existe, None si no se encuentra.
         """
-        return self.organigrama_repo.obtener_organigrama_por_id(id)
+        return self.organigrama_repo.obtener_organigrama_por_id(id, user_id)
 
-    def eliminar_organigrama(self, id: int) -> bool:
+    def eliminar_organigrama(self, id: int, user_id: int) -> bool:
         """
         Elimina un organigrama por su ID.
 
         :param id: Identificador del organigrama.
         :return: True si se eliminó correctamente, False si no se encuentra.
         """
-        return self.organigrama_repo.eliminar_organigrama(id)
+        return self.organigrama_repo.eliminar_organigrama(id, user_id)
 
-    def actualizar_organigrama(self, id: int, data: dict) -> Organigrama:
+    def actualizar_organigrama(self, id: int, data: dict, user_id: int) -> Organigrama:
         """
         Actualiza un organigrama existente.
 
@@ -55,4 +56,4 @@ class OrganigramaService:
         :param data: Datos actualizados del organigrama.
         :return: Organigrama actualizado si existe, None si no se encuentra.
         """
-        return self.organigrama_repo.actualizar_organigrama(id, data)
+        return self.organigrama_repo.actualizar_organigrama(id, data, user_id)

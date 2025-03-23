@@ -31,6 +31,8 @@ class NodoRepository:
                 "padre_id": data.get("padre_id"),  # Puede ser opcional
             }
 
+            organigrama = self.session.query(NodoModel).filter_by(id=data["organigrama_id"]).first()
+
             nuevo_nodo = NodoModel(**nodo_data)
             self.session.add(nuevo_nodo)
             self.session.commit()
@@ -39,6 +41,7 @@ class NodoRepository:
                 nuevo_nodo.nombre,
                 nuevo_nodo.titulo,
                 nuevo_nodo.tipo_cargo,
+                nuevo_nodo.organigrama_id,
                 nuevo_nodo.padre_id,
             )
         except Exception as e:
@@ -52,7 +55,7 @@ class NodoRepository:
         :return: Lista de nodos.
         """
         nodo = self.session.query(NodoModel).all()
-        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.padre_id) for n in nodo]
+        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id) for n in nodo]
 
     def obtener_nodo_por_id(self, id: int) -> Optional[Nodo]:
         """
@@ -64,7 +67,7 @@ class NodoRepository:
         nodo = self.session.get(NodoModel, id)
         if not nodo:
             return None
-        return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.padre_id)
+        return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.organigrama_id,nodo.padre_id)
 
     def eliminar_nodo(self, id: int) -> bool:
         """
@@ -104,7 +107,7 @@ class NodoRepository:
                     setattr(nodo, key, value)
 
             self.session.commit()
-            return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.padre_id)
+            return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.organigrama_id, nodo.padre_id)
         except Exception as e:
             self.session.rollback()
             raise RuntimeError(f"Error al actualizar nodo: {str(e)}")
@@ -119,3 +122,13 @@ class NodoRepository:
         for nodo_hijo in nodos_hijos:
             self.session.delete(nodo_hijo)
         self.session.commit()
+
+    def obtener_nodos_por_organigrama(self, organigrama_id: int) -> List[Nodo]:
+        """
+        Obtiene todos los nodos de un organigrama.
+
+        :param organigrama_id: ID del organigrama.
+        :return: Lista de nodos.
+        """
+        nodos = self.session.query(NodoModel).filter_by(organigrama_id=organigrama_id).all()
+        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id) for n in nodos]

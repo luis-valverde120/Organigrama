@@ -23,19 +23,16 @@ class NodoService:
         :raises ValueError: Si el organigrama no existe.
         """
         # Validar si el organigrama_id existe
-        organigrama_id = data.get('organigrama_id')
-        if not organigrama_id or not self.organigrama_repo.obtener_organigrama_por_id(organigrama_id):
-            raise ValueError("El organigrama asociado no es válido o no existe.")
-
         return self.nodo_repo.agregar_nodo(data)
 
-    def obtener_nodos(self) -> list[Nodo]:
+    def obtener_nodos_por_organigrama(self, organigrama_id: int) -> list[Nodo]:
         """
-        Obtiene todos los nodos.
+        Obtiene todos los nodos de un organigrama.
 
+        :param organigrama_id: ID del organigrama.
         :return: Lista de nodos.
         """
-        return self.nodo_repo.obtener_nodos()
+        return self.nodo_repo.obtener_nodos_por_organigrama(organigrama_id)
 
     def obtener_nodo_por_id(self, id: int) -> Nodo:
         """

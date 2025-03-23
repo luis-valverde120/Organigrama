@@ -4,19 +4,19 @@ from domain.models.nodo import Nodo
 class Organigrama:
     """Representa un organigrama que contiene nodos jerárquicos"""
 
-    def __init__(self, id: int, nombre: str, descripcion: str, usuario_id: Optional[int] = None):
+    def __init__(self, id: int, nombre: str, usuario_id: Optional[int] = None, nodos: Optional[List[Nodo]] = None):
         """
-        Inicializa un organigrama con un identificador y un nombre. 
+        Inicializa un organigrama con un identificador y un nombre.
 
         :param id: Identificador único del organigrama.
         :param nombre: Nombre del organigrama.
-        :param descripcion: Descripción del organigrama.
+        :param usuario_id: ID del usuario propietario del organigrama.
+        :param nodos: Lista de nodos asociados al organigrama.
         """
         self.id = id
         self.nombre = nombre
-        self.descripcion = descripcion
-        self.usuario_id: Optional[int] = usuario_id # ID del usuario propietario del organigrama.
-        self.nodos: List['Nodo'] = []  # Lista de nodos en el organigrama.
+        self.usuario_id: Optional[int] = usuario_id  # ID del usuario propietario del organigrama.
+        self.nodos: List[Nodo] = nodos or []  # Lista de nodos en el organigrama.
 
     def agregar_nodo(self, nodo: Nodo):
         """
@@ -28,7 +28,7 @@ class Organigrama:
 
     def eliminar_nodos(self, nodo_id: int):
         """
-        Elimina todos los nodos del organigrama y sus decendientes.
+        Elimina todos los nodos del organigrama y sus descendientes.
         """
         self.nodos = [nodo for nodo in self.nodos if nodo.id != nodo_id]
 
@@ -47,13 +47,12 @@ class Organigrama:
         return {
             'id': self.id,
             'nombre': self.nombre,
-            'descripcion': self.descripcion,
             'usuario_id': self.usuario_id,
-            'nodos': [nodo.to_dict() for nodo in self.nodos]
+            'nodos': [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id).to_dict() for n in self.nodos]
         }
 
     def __repr__(self):
         """
         Representación en cadena del organigrama para depuración.
-        """ 
-        return f"Organigrama(id={self.id}, nombre='{self.nombre}', descripcion='{self.descripcion}', usuario_id={self.usuario_id}, nodos={self.nodos})"
+        """
+        return f"Organigrama(id={self.id}, nombre='{self.nombre}', usuario_id={self.usuario_id}, nodos={self.nodos})"

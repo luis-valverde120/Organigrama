@@ -46,7 +46,7 @@ class OrganigramaModel(db.Model):
     nodos = db.relationship('NodoModel', back_populates='organigrama', cascade="all, delete")
 
     def __repr__(self):
-        return f"OrganigramaModel(id={self.id}, nombre={self.nombre})"
+        return f"OrganigramaModel(id={self.id}, nombre={self.nombre}, usuario_id={self.usuario_id})"
 
 # Definir el modelo de Nodo
 class NodoModel(db.Model):
