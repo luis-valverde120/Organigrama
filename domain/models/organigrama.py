@@ -4,7 +4,7 @@ from domain.models.nodo import Nodo
 class Organigrama:
     """Representa un organigrama que contiene nodos jerárquicos"""
 
-    def __init__(self, id: int, nombre: str, usuario_id: Optional[int] = None, nodos: Optional[List[Nodo]] = None):
+    def __init__(self, id: int, nombre: str, descripcion: str = None, usuario_id: Optional[int] = None, nodos: Optional[List[Nodo]] = None):
         """
         Inicializa un organigrama con un identificador y un nombre.
 
@@ -15,6 +15,7 @@ class Organigrama:
         """
         self.id = id
         self.nombre = nombre
+        self.descripcion = descripcion
         self.usuario_id: Optional[int] = usuario_id  # ID del usuario propietario del organigrama.
         self.nodos: List[Nodo] = nodos or []  # Lista de nodos en el organigrama.
 
@@ -48,6 +49,7 @@ class Organigrama:
             'id': self.id,
             'nombre': self.nombre,
             'usuario_id': self.usuario_id,
+            'descripcion': self.descripcion,
             'nodos': [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id).to_dict() for n in self.nodos]
         }
 
@@ -55,4 +57,4 @@ class Organigrama:
         """
         Representación en cadena del organigrama para depuración.
         """
-        return f"Organigrama(id={self.id}, nombre='{self.nombre}', usuario_id={self.usuario_id}, nodos={self.nodos})"
+        return f"Organigrama(id={self.id}, nombre='{self.nombre}', descripcion={self.descripcion}, usuario_id={self.usuario_id}, nodos={self.nodos})"

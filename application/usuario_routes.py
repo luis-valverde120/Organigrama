@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from domain.services import UsuarioService
 
 usuario_bp = Blueprint('usuario', __name__)
@@ -44,3 +44,14 @@ def obtener_perfil():
     if usuario:
         return jsonify(usuario.to_dict()), 200
     return jsonify({"error": "Usuario no encontrado"}), 404
+
+@usuario_bp.route('/validate-token', methods=['GET'])
+@jwt_required()
+def validar_token():
+    """Valida si el token JWT es válido"""
+    try:
+        verify_jwt_in_request()  # Verifica si el token es válido
+        user_id = get_jwt_identity()  # Obtiene el ID del usuario autenticado
+        return jsonify({"message": "Token válido", "user_id": user_id}), 200
+    except Exception as e:
+        return jsonify({"error": "Token inválido", "details": str(e)}), 401

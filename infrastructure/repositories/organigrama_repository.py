@@ -24,6 +24,7 @@ class OrganigramaRepository:
         try:
             organigrama_data = {
                 "nombre": data["nombre"],
+                "descripcion": data["descripcion"],
                 "usuario_id": data["usuario_id"],
             }
 
@@ -34,6 +35,7 @@ class OrganigramaRepository:
             return Organigrama(
                 nuevo_organigrama.id,
                 nuevo_organigrama.nombre,
+                nuevo_organigrama.descripcion
             )
         except Exception as e:
             self.session.rollback()
@@ -47,7 +49,7 @@ class OrganigramaRepository:
         :return: Lista de organigramas.
         """
         organigramas = self.session.query(OrganigramaModel).filter_by(usuario_id=user_id).all()
-        return [Organigrama(o.id, o.nombre, o.usuario_id, o.nodos) for o in organigramas]
+        return [Organigrama(o.id, o.nombre, o.descripcion, o.usuario_id, o.nodos) for o in organigramas]
 
     def obtener_organigrama_por_id(self, id: int, user_id: int) -> Optional[Organigrama]:
         """
@@ -60,7 +62,7 @@ class OrganigramaRepository:
         organigrama = self.session.query(OrganigramaModel).filter_by(id=id, usuario_id=user_id).first()
         if not organigrama:
             return None  # Devuelve None si no se encuentra el organigrama
-        return Organigrama(organigrama.id, organigrama.nombre, organigrama.usuario_id, organigrama.nodos)
+        return Organigrama(organigrama.id, organigrama.nombre, organigrama.descripcion, organigrama.usuario_id, organigrama.nodos)
 
     def eliminar_organigrama(self, id: int, user_id: int) -> bool:
         """
@@ -99,7 +101,7 @@ class OrganigramaRepository:
                     setattr(organigrama, key, value)
 
             self.session.commit()
-            return Organigrama(organigrama.id, organigrama.nombre, organigrama.usuario_id)
+            return Organigrama(organigrama.id, organigrama.nombre, organigrama.descripcion, organigrama.usuario_id)
         except Exception as e:
             self.session.rollback()
             raise RuntimeError(f"Error al actualizar organigrama: {str(e)}")
