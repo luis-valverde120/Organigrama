@@ -61,6 +61,7 @@ def actualizar_nodo(id):
     if not nodo or not organigrama_service.obtener_organigrama_por_id(nodo.organigrama_id, user_id):
         return jsonify({"error": "Nodo no encontrado o no autorizado"}), 404
 
+    # Actualizar el nodo
     nodo_actualizado = nodo_service.actualizar_nodo(id, data)
     return jsonify(nodo_actualizado.to_dict()), 200
 

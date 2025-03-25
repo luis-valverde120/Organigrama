@@ -55,7 +55,7 @@ class NodoRepository:
         :return: Lista de nodos.
         """
         nodo = self.session.query(NodoModel).all()
-        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id) for n in nodo]
+        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id, n.color_bg, n.color_border, n.color_text) for n in nodo]
 
     def obtener_nodo_por_id(self, id: int) -> Optional[Nodo]:
         """
@@ -102,12 +102,23 @@ class NodoRepository:
             if not nodo:
                 return None
 
+            # Actualizar los campos del nodo, incluyendo los colores
             for key, value in data.items():
                 if hasattr(nodo, key):
                     setattr(nodo, key, value)
 
             self.session.commit()
-            return Nodo(nodo.id, nodo.nombre, nodo.titulo, nodo.tipo_cargo, nodo.organigrama_id, nodo.padre_id)
+            return Nodo(
+                nodo.id,
+                nodo.nombre,
+                nodo.titulo,
+                nodo.tipo_cargo,
+                nodo.organigrama_id,
+                nodo.padre_id,
+                nodo.color_bg,
+                nodo.color_border,
+                nodo.color_text
+            )
         except Exception as e:
             self.session.rollback()
             raise RuntimeError(f"Error al actualizar nodo: {str(e)}")
@@ -131,4 +142,4 @@ class NodoRepository:
         :return: Lista de nodos.
         """
         nodos = self.session.query(NodoModel).filter_by(organigrama_id=organigrama_id).all()
-        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id) for n in nodos]
+        return [Nodo(n.id, n.nombre, n.titulo, n.tipo_cargo, n.organigrama_id, n.padre_id, n.color_bg, n.color_border, n.color_text) for n in nodos]
