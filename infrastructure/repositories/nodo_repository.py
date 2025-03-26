@@ -71,17 +71,23 @@ class NodoRepository:
 
     def eliminar_nodo(self, id: int) -> bool:
         """
-        Elimina un nodo de la base de datos.
+        Elimina un nodo de la base de datos. Si el nodo tiene hijos, también se eliminan.
+        Si el nodo es un hijo, no afecta al nodo padre.
 
-        :param id: Identificador del nodo
-        :return: True si el nodo fue eliminado, False si no se encuentra el nodo
+        :param id: Identificador del nodo.
+        :return: True si el nodo fue eliminado, False si no se encuentra el nodo.
         """
         try:
             nodo = self.session.get(NodoModel, id)
             if not nodo:
                 return False
 
-            self.eliminar_nodos_hijos(nodo.id)
+            # Verificar si el nodo tiene hijos
+            nodos_hijos = self.session.query(NodoModel).filter_by(padre_id=id).all()
+            for hijo in nodos_hijos:
+                self.session.delete(hijo)  # Eliminar todos los hijos del nodo
+
+            # Eliminar el nodo actual
             self.session.delete(nodo)
             self.session.commit()
             return True
@@ -123,14 +129,16 @@ class NodoRepository:
             self.session.rollback()
             raise RuntimeError(f"Error al actualizar nodo: {str(e)}")
 
-    def eliminar_nodos_hijos(self, nodo_id: int):
+    def eliminar_nodos_descendientes(self, nodo_id: int):
         """
-        Elimina los nodos hijos antes de eliminar un nodo principal.
+        Elimina todos los nodos descendientes de un nodo específico.
 
-        :param nodo_id: ID del nodo a eliminar.
+        :param nodo_id: ID del nodo padre cuyos descendientes serán eliminados.
         """
         nodos_hijos = self.session.query(NodoModel).filter(NodoModel.padre_id == nodo_id).all()
         for nodo_hijo in nodos_hijos:
+            # Llamada recursiva para eliminar los descendientes del nodo hijo
+            self.eliminar_nodos_descendientes(nodo_hijo.id)
             self.session.delete(nodo_hijo)
         self.session.commit()
 

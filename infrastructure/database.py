@@ -57,20 +57,28 @@ class NodoModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     titulo = db.Column(db.String(100), nullable=False)
-    tipo_cargo = db.Column(db.String(100), nullable=False)  
+    tipo_cargo = db.Column(db.String(100), nullable=False)
     organigrama_id = db.Column(db.Integer, db.ForeignKey('organigramas.id', ondelete="CASCADE"), nullable=False)
     padre_id = db.Column(db.Integer, db.ForeignKey('nodos.id'), nullable=True)
 
     # Campos personalizables
     color_bg = db.Column(db.String(7), default="#FFFFFF")  # Color de fondo
     color_border = db.Column(db.String(7), default="#000000")  # Color del borde
-    color_text = db.Column(db.String(7), default="#000000")  # Color sdel texto
+    color_text = db.Column(db.String(7), default="#000000")  # Color del texto
 
     # Relación con el modelo Organigrama
     organigrama = db.relationship('OrganigramaModel', back_populates='nodos')
 
     # Relación con el modelo Nodo (hijos)
-    hijos = db.relationship('NodoModel', backref='padre', remote_side=[id], cascade="all, delete")
+    hijos = db.relationship(
+        'NodoModel',
+        backref=db.backref('padre', remote_side=[id]),
+        cascade="all, delete-orphan",  # Elimina los hijos solo si el padre es eliminado
+        passive_deletes=True  # Permite que la base de datos maneje la eliminación en cascada
+    )
+
+    def __repr__(self):
+        return f"NodoModel(id={self.id}, nombre={self.nombre}, organigrama_id={self.organigrama_id})"
 
 def init_db(app):
     """
