@@ -1,2 +1,2 @@
-web: gunicorn --bind 0.0.0.0:8000 app:create_app
+web: gunicorn --bind 0.0.0.0:5000 app:create_app
 python-3.12.2

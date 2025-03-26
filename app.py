@@ -10,7 +10,7 @@ from application.nodo_routes import nodo_bp
 from application.oranigrama_routes import organigrama_bp
 from application.usuario_routes import usuario_bp 
 
-def create_app():
+def create_app(*args, **kwargs):
     """Factory function para crear la aplicacion flask"""
     # carga de variables de entorno
     load_dotenv()
