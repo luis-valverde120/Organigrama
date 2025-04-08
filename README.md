@@ -6,7 +6,7 @@ Este proyecto es una aplicación para la gestión de organigramas utilizando una
 
 - **Backend**: Python con Flask.
 - **Base de datos**: PostgreSQL utilizando SQLAlchemy como ORM.
-- **Frontend**: Streamlit para la interfaz de usuario.
+- **Frontend**:  Nextjs para el frontend
 
 ## Arquitectura
 
