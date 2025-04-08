@@ -60,7 +60,6 @@ A continuación se detallan las dependencias necesarias para este proyecto, incl
 - Flask (v2.2.5)
 - SQLAlchemy (v1.4.46)
 - psycopg2 (v2.9.6)
-- Streamlit (v1.25.0)
 
 ## Uso
 
